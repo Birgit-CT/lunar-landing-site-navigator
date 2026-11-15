@@ -922,7 +922,7 @@ const Music=(()=>{
   const BELL=[[69,72,76,79,83,88],[69,72,77,79,84,88],[69,71,74,78,81,86],[67,71,74,76,79,83],[69,72,74,76,81,86]];
   const mtof=m=>440*Math.pow(2,(m-69)/12);
   let ctx=null,master,bus,verb,pad=[],step=1,bellT=0,on=false,wanted=true;
-  try{wanted=localStorage.getItem('lln-music')!=='off';}catch(e){}
+  try{wanted=localStorage.getItem('lln-music-v2')!=='off';}catch(e){}
   function impulse(sec){const n=Math.floor(ctx.sampleRate*sec),b=ctx.createBuffer(2,n,ctx.sampleRate);
     for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6);}return b;}
   function build(){
@@ -968,27 +968,31 @@ const Music=(()=>{
   function scheduleBell(){clearTimeout(bellT);bellT=setTimeout(()=>{if(on&&ctx&&ctx.state==='running'){bell();if(Math.random()<.3)setTimeout(()=>on&&bell(),700+Math.random()*900);}scheduleBell();},4200+Math.random()*6500);}
   function fadeTo(v,sec){if(!ctx)return;const t=ctx.currentTime;master.gain.cancelScheduledValues(t);master.gain.setValueAtTime(master.gain.value,t);master.gain.linearRampToValueAtTime(v,t+sec);}
   function ui(){const b=$('musicBtn');if(!b)return;b.innerHTML=on?ON:OFF;b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?'Turn music off':'Turn music on');b.title=on?'Music: on':'Music: off';}
-  async function play(){try{if(!ctx)build();if(ctx.state!=='running')await ctx.resume();on=true;fadeTo(.55,6);}catch(e){on=false;}ui();}
+  async function play(){try{if(!ctx)build();if(ctx.state!=='running')await ctx.resume();on=ctx.state==='running';if(on)fadeTo(.55,6);}catch(e){on=false;}ui();}
   function stop(){on=false;fadeTo(0,1.5);ui();}
   ui();
   return {
-    toggle(){wanted=!on;try{localStorage.setItem('lln-music',wanted?'on':'off');}catch(e){}wanted?play():stop();},
-    firstGesture(){if(wanted&&!on)play();},
+    toggle(){wanted=!on;try{localStorage.setItem('lln-music-v2',wanted?'on':'off');}catch(e){}wanted?play():stop();},
+    firstGesture(){if(wanted&&!on)play();return !wanted||on;},
+    isOn(){return on;},
+    pause(){if(on)stop();},
+    resume(){if(wanted&&!on)play();},
     step(k){if(k===step)return;step=k;if(ctx)chord(k);},
     hide(h){if(!ctx)return;if(h)ctx.suspend();else if(on)ctx.resume();}
   };
 })();
 $('musicBtn').onclick=e=>{e.stopPropagation();Music.toggle();};
-const firstGesture=e=>{if(e.target.closest&&e.target.closest('#musicBtn'))return;Music.firstGesture();removeEventListener('pointerdown',firstGesture,true);removeEventListener('keydown',firstGesture,true);};
-addEventListener('pointerdown',firstGesture,true);addEventListener('keydown',firstGesture,true);
+const GESTURES=['pointerdown','pointerup','click','touchend','keydown'];
+const firstGesture=e=>{if(e.target.closest&&(e.target.closest('#musicBtn')||e.target.closest('#demoBtn')))return;if(Music.firstGesture())GESTURES.forEach(t=>removeEventListener(t,firstGesture,true));};
+GESTURES.forEach(t=>addEventListener(t,firstGesture,true));
 document.addEventListener('visibilitychange',()=>Music.hide(document.hidden));
 (function(){
   const pop=$('demoPop'), bg=$('demoBg'), v=$('demoVid'); let musicWasOn=false;
   const open=()=>{pop.classList.add('open');bg.classList.add('open');pop.focus();
-    musicWasOn=$('musicBtn').getAttribute('aria-pressed')==='true'; if(musicWasOn)Music.toggle();
+    musicWasOn=Music.isOn(); Music.pause();
     try{v.currentTime=0;const p=v.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}};
   const close=()=>{pop.classList.remove('open');bg.classList.remove('open');try{v.pause();}catch(e){}
-    if(musicWasOn){Music.toggle();musicWasOn=false;} $('demoBtn').focus();};
+    if(musicWasOn){Music.resume();musicWasOn=false;} $('demoBtn').focus();};
   v.addEventListener('error',()=>{$('demoNote').textContent='The video could not be loaded here. Try opening the page in its own browser tab.';});
   $('demoBtn').onclick=e=>{e.stopPropagation();open();};
   $('demoClose').onclick=close; bg.onclick=close;
