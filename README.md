@@ -1,6 +1,6 @@
 # Lunar Landing Site Navigator
 
-**Live app:** https://YOUR-GITHUB-USERNAME.github.io/lunar-landing-site-navigator/
+**Live app:** https://birgit-ct.github.io/lunar-landing-site-navigator/
 **30-second demo:** https://birgit-ct.github.io/lunar-landing-site-navigator/demo.mp4
 
 Created by Birgit Cecilie Tarlebø at NASA Space Apps Challenge 2026 – Oslo.
