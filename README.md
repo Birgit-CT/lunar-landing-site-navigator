@@ -4,7 +4,8 @@
 **30-second demo:** https://birgit-ct.github.io/lunar-landing-site-navigator/demo.mp4
 
 Created by Birgit Cecilie Tarlebø at NASA Space Apps Challenge 2026 – Oslo.
-An independent prototype, not an official NASA product.
+
+> **Experimental prototype.** Built in one weekend for NASA Space Apps 2026. The sunlight and Earth-visibility calculations use NASA terrain data and were checked against NASA illumination maps, but the mission profiles, targets, scores and verdicts are illustrative examples that have not been validated by mission engineers. Use it to explore and understand trade-offs, not as a landing-site recommendation or safety assessment. Not an official NASA product.
 
 Choosing where and when to land near the lunar south pole is a trade-off between sunlight for power, a direct line of sight to Earth for communication, and how long a mission must survive in darkness. Lunar Landing Site Navigator turns NASA terrain data into a guided, game-like experience. You choose a mission type, pick a site, scrub through time, see why a landing window works or fails, and pin the options to compare them side by side.
 
